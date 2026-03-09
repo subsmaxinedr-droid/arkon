@@ -43,8 +43,7 @@ import {
   unlockWithPassword,
   enablePassword,
   disablePassword,
-  exportEncryptedBackup,
-  restoreFromEncryptedBackup,
+  getPrivKey,
   lockWallet,
   getVtxoManager,
   getArkFees,
@@ -160,17 +159,6 @@ async function promptForSecret(message, placeholder = '') {
   return trimmed
 }
 
-function downloadTextFile(filename, text) {
-  const blob = new Blob([text], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  document.body.appendChild(a)
-  a.click()
-  a.remove()
-  setTimeout(() => URL.revokeObjectURL(url), 1500)
-}
 
 
 async function ensureUnlockedIfNeeded() {
@@ -1261,10 +1249,6 @@ function wireBackup() {
   })
 }
 
-// FIX #10 — Backup sheet now shows the private key hex directly for restore.
-// The old mnemonic system is removed because it could not faithfully reconstruct
-// the full 32-byte key (only 16 bytes were encoded into the 12 words).
-
 window.openBackupSheet = window._openBackupSheet = async function() {
   const body = document.getElementById('backup-body')
   if (!body) return
@@ -1273,27 +1257,27 @@ window.openBackupSheet = window._openBackupSheet = async function() {
     <div style="background:var(--reds);border:1px solid var(--red);border-radius:var(--r-md);padding:12px 14px;margin-bottom:20px;display:flex;gap:10px;align-items:flex-start">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;flex-shrink:0;color:var(--red);margin-top:1px"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
       <div>
-        <div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:2px">Private key display disabled</div>
-        <div style="font-size:11px;color:var(--red);opacity:.85">This hardened build no longer renders your raw private key into the page or copies it to the clipboard.</div>
+        <div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:2px">Never share your private key</div>
+        <div style="font-size:11px;color:var(--red);opacity:.85">Anyone with this key has full access to your funds. Write it down and store it somewhere safe.</div>
       </div>
     </div>
 
-    <div style="font-size:12px;color:var(--t2);line-height:1.65;margin-bottom:14px">Use an encrypted backup file protected by a password you choose. Keep that password offline and separate from the file.</div>
-
-    <button class="btnp" style="height:46px;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:14px" onclick="window._exportWalletBackup()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      Export encrypted backup
-    </button>
-
-    <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Restore from encrypted backup</div>
-    <input id="restore-backup-file" type="file" accept="application/json,.json" style="width:100%;background:var(--bg3);border:1.5px solid var(--bdr);border-radius:12px;padding:12px;font-size:13px;color:var(--t1);box-sizing:border-box;margin-bottom:10px;outline:none" />
-    <button class="btnp" style="height:46px;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:16px;background:var(--surf);color:var(--acc2);border:1.5px solid var(--acc)" onclick="window._restoreWalletBackup()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
-      Restore encrypted backup
-    </button>
+    <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Your private key (hex)</div>
+    <div id="privkey-masked" style="background:var(--bg3);border:1.5px solid var(--bdr);border-radius:12px;padding:14px;font-size:20px;color:var(--t3);font-family:monospace;word-break:break-all;margin-bottom:10px;text-align:center;letter-spacing:.1em">••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••</div>
+    <div id="privkey-revealed" style="display:none;background:var(--bg3);border:1.5px solid var(--bdr);border-radius:12px;padding:14px;font-size:12px;color:var(--t1);font-family:monospace;word-break:break-all;margin-bottom:10px;user-select:all;line-height:1.7"></div>
+    <div style="display:flex;gap:8px;margin-bottom:20px">
+      <button id="btn-reveal-key" class="btnp" style="flex:1;height:42px;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--surf);color:var(--acc2);border:1.5px solid var(--acc)" onclick="window._revealPrivKey()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Show private key
+      </button>
+      <button id="btn-copy-key" class="btnp" style="display:none;flex:1;height:42px;align-items:center;justify-content:center;gap:6px" onclick="window._copyPrivKey()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        Copy
+      </button>
+    </div>
 
     <details style="background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:10px 12px">
-      <summary style="cursor:pointer;color:var(--t2);font-size:12px;font-weight:700">Legacy raw private key import</summary>
+      <summary style="cursor:pointer;color:var(--t2);font-size:12px;font-weight:700">Import a different private key</summary>
       <div style="font-size:12px;color:var(--t3);margin:10px 0">Paste a 64-character hex private key to import a wallet. This will replace your current wallet.</div>
       <input id="restore-privkey-input" type="password" placeholder="64-character hex private key…"
         style="width:100%;background:var(--bg);border:1.5px solid var(--bdr);border-radius:12px;padding:12px;font-size:13px;color:var(--t1);font-family:monospace;box-sizing:border-box;margin-bottom:10px;outline:none" />
@@ -1306,38 +1290,35 @@ window.openBackupSheet = window._openBackupSheet = async function() {
   openSheet('backup')
 }
 
-window._exportWalletBackup = async function() {
+window._revealPrivKey = async function() {
+  const masked   = document.getElementById('privkey-masked')
+  const revealed = document.getElementById('privkey-revealed')
+  const btnReveal = document.getElementById('btn-reveal-key')
+  const btnCopy   = document.getElementById('btn-copy-key')
+  if (!revealed) return
   try {
-    const password = await promptForSecret('Choose a backup password (min 10 characters). Keep it separate from the backup file.')
-    if (password.length < 10) {
-      showToast('Backup password must be at least 10 characters')
-      return
-    }
-    const payload = await exportEncryptedBackup(password)
-    downloadTextFile(`arkon-backup-${new Date().toISOString().slice(0,10)}.json`, JSON.stringify(payload, null, 2))
-    showToast('Encrypted backup exported')
-  } catch (err) {
-    if (err?.code !== 'CANCELLED') showToast(err?.message || 'Backup export failed')
+    const hex = await getPrivKey()
+    if (!hex) { showToast('Wallet must be unlocked to view private key'); return }
+    // Set via textContent — key never appears as a raw HTML string in the page source
+    revealed.textContent = hex
+    masked.style.display = 'none'
+    revealed.style.display = 'block'
+    btnReveal.style.display = 'none'
+    btnCopy.style.display = 'flex'
+  } catch (e) {
+    showToast(e?.message || 'Could not reveal private key')
   }
 }
 
-window._restoreWalletBackup = async function() {
-  const input = document.getElementById('restore-backup-file')
-  const file = input?.files?.[0]
-  if (!file) {
-    showToast('Choose a backup file first')
-    return
-  }
+window._copyPrivKey = async function() {
+  const revealed = document.getElementById('privkey-revealed')
+  const hex = revealed?.textContent?.trim()
+  if (!hex) return
   try {
-    const password = await promptForSecret('Enter the password for this backup file')
-    const text = await file.text()
-    const payload = JSON.parse(text)
-    const ok = await restoreFromEncryptedBackup(payload, password)
-    if (!ok) throw new Error('Backup restore failed')
-    showToast('Backup restored — reloading…')
-    setTimeout(() => location.reload(), 1200)
-  } catch (err) {
-    showToast(err?.message || 'Backup restore failed')
+    await navigator.clipboard.writeText(hex)
+    showToast('Private key copied')
+  } catch {
+    showToast('Copy failed — select the key and copy manually')
   }
 }
 

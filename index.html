@@ -1096,7 +1096,7 @@ button{touch-action:manipulation}
         <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2" style="width:24px;height:24px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
       </div>
       <div style="font-size:22px;font-weight:800;color:#fff;letter-spacing:-.01em;margin-bottom:6px;text-align:center">Back up your wallet</div>
-      <div style="font-size:13px;color:rgba(255,255,255,0.5);line-height:1.6;text-align:center;max-width:290px;margin-bottom:20px">This hardened build avoids showing your raw private key on screen. Create the wallet, then export an encrypted backup from Settings.</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.5);line-height:1.6;text-align:center;max-width:290px;margin-bottom:20px">Your private key is stored securely on this device. You can view it any time from Settings → Backup.</div>
 
       <div class="sp-scroll">
         <!-- Warning banner -->
@@ -1105,13 +1105,13 @@ button{touch-action:manipulation}
           <div style="font-size:12px;color:#f5a623;line-height:1.5">Never share this key. Anyone with it has full access to your funds.</div>
         </div>
 
-        <div style="background:rgba(59,130,246,0.10);border:1px solid rgba(59,130,246,0.30);border-radius:13px;padding:12px 14px;margin-bottom:14px"><div style="font-size:12px;color:rgba(255,255,255,0.78);line-height:1.6">Your private key will be generated securely, but it will <strong>not</strong> be rendered on screen or copied to the clipboard. After setup, export an encrypted backup from Settings.</div></div>
+        <div style="background:rgba(59,130,246,0.10);border:1px solid rgba(59,130,246,0.30);border-radius:13px;padding:12px 14px;margin-bottom:14px"><div style="font-size:12px;color:rgba(255,255,255,0.78);line-height:1.6">After setup, go to <strong>Settings → Backup</strong> to reveal and write down your 64-character hex private key. Store it somewhere safe and offline.</div></div>
 
         <!-- Backup confirmation checkbox -->
         <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;padding:13px 14px;background:rgba(255,255,255,0.05);border:1.5px solid rgba(255,255,255,0.1);border-radius:13px;margin-bottom:16px;transition:border-color .2s" id="sp-backup-label">
           <input type="checkbox" id="sp-backup-check" onchange="checkNewKeyBackup()"
             style="width:18px;height:18px;margin-top:1px;flex-shrink:0;accent-color:#3b82f6;cursor:pointer" />
-          <span style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.55">I understand I need to export an encrypted backup after wallet creation</span>
+          <span style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.55">I understand I need to write down my private key from Settings → Backup</span>
         </label>
 
         <button id="sp-create-continue" onclick="splashFinishCreate()" disabled
