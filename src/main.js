@@ -290,7 +290,7 @@ window._savePasswordSettings = async function({ enabled, password, confirmPasswo
     if (enabled) {
       const first = String(password || '')
       const second = String(confirmPassword || '')
-      if (first.length < 4) throw new Error('Use at least 4 characters')
+      if (first.length < 8) throw new Error('Use at least 8 characters')
       if (first !== second) throw new Error('Passwords did not match')
       await enablePassword(first)
       _passwordPromptedThisSession = true
