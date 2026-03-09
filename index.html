@@ -738,7 +738,7 @@ select.finp{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns
 .sheet-handle{width:36px;height:4px;border-radius:2px;background:var(--bg4)}
 .sheet-head{display:flex;align-items:center;justify-content:space-between;padding:12px 20px 16px}
 .sheet-title{font-size:18px;font-weight:800;letter-spacing:-.01em;color:var(--t1)}
-.sheet-close{width:30px;height:30px;border-radius:50%;background:var(--bg3);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--t2);transition:background .15s}
+.sheet-close{width:32px;height:32px;min-width:32px;min-height:32px;border-radius:50%;background:var(--bg3);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;color:var(--t2);transition:background .15s}
 .sheet-close:active{background:var(--bg4)}
 .sheet-body{padding:0 20px 28px}
 
@@ -970,7 +970,7 @@ select.finp{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns
 
 /* ── Global mobile improvements ── */
 /* All buttons: minimum 44pt touch target per Apple HIG / Google Material */
-.btnp,.btns,.sheet-close,.ic-btn,.ni,.ttab{min-height:44px}
+.btnp,.btns,.ic-btn,.ni,.ttab{min-height:44px}
 /* Smooth momentum scroll on all scroll containers */
 .sheet-body,.page{-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 /* Prevent double-tap zoom on buttons */
@@ -985,6 +985,14 @@ button{touch-action:manipulation}
 #navbar{
   padding-bottom:max(env(safe-area-inset-bottom,0px),12px);
   height:calc(64px + max(env(safe-area-inset-bottom,0px),0px));
+}
+/* Keyboard-visible: shrink sheet max-height so content stays accessible */
+body.kb-open .overlay{
+  align-items:flex-start;
+  padding-top:env(safe-area-inset-top,0px);
+}
+body.kb-open .sheet{
+  max-height:calc(var(--vvh,100vh) - 12px);
 }
 </style>
 
@@ -1685,15 +1693,17 @@ button{touch-action:manipulation}
         </div>
         <!-- Invoice area: replaces form after generation -->
         <div id="ln-invoice-area" style="display:none">
-          <div class="sht-qr"><div class="sht-qr-inner"><div id="rcv-ln-qr"></div></div></div>
-          <!-- Amount subtext -->
-          <div id="ln-invoice-amt-label" style="text-align:center;margin-top:10px;margin-bottom:2px">
-            <span style="font-size:18px;font-weight:800;color:var(--t1)" id="ln-invoice-amt-display">—</span>
-            <span style="font-size:12px;color:var(--t3);margin-left:4px">SATS</span>
+          <div style="background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--r-md);padding:16px;margin-bottom:14px">
+            <div class="sht-qr" style="margin-bottom:10px"><div class="sht-qr-inner"><div id="rcv-ln-qr"></div></div></div>
+            <!-- Amount subtext -->
+            <div id="ln-invoice-amt-label" style="text-align:center;margin-top:4px;margin-bottom:2px">
+              <span style="font-size:18px;font-weight:800;color:var(--t1)" id="ln-invoice-amt-display">—</span>
+              <span style="font-size:12px;color:var(--t3);margin-left:4px">SATS</span>
+            </div>
+            <div id="ln-invoice-fiat-label" style="font-size:11px;color:var(--t3);text-align:center;margin-bottom:12px" id="ln-invoice-fiat-display"></div>
+            <div id="ln-status" style="display:none;font-size:12px;color:var(--t3);text-align:center;margin-bottom:10px"></div>
+            <div class="addr-row" style="margin-bottom:0"><span class="addr-txt" id="ln-invoice-val">—</span><div class="cpb" onclick="cpTxt('ln-invoice-val')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></div></div>
           </div>
-          <div id="ln-invoice-fiat-label" style="font-size:11px;color:var(--t3);text-align:center;margin-bottom:12px" id="ln-invoice-fiat-display"></div>
-          <div id="ln-status" style="display:none;font-size:12px;color:var(--t3);text-align:center;margin-bottom:10px"></div>
-          <div class="addr-row" style="margin-bottom:10px"><span class="addr-txt" id="ln-invoice-val">—</span><div class="cpb" onclick="cpTxt('ln-invoice-val')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></div></div>
           <button class="btnp" onclick="cpTxt('ln-invoice-val')" style="margin-bottom:10px">Copy Invoice</button>
           <button class="btns" onclick="resetLnInvoiceForm()">New Invoice</button>
         </div>
@@ -7014,5 +7024,39 @@ async function arcadeSendBitcoin(address, amount) {
 
 <!-- Arkade SDK boot -->
 <script type="module" src="/src/main.js"></script>
+
+<!-- Keyboard / viewport awareness: keeps sheets visible when soft keyboard appears -->
+<script>
+(function(){
+  if (!window.visualViewport) return;
+  var THRESHOLD = 150; // px shrinkage before we consider keyboard open
+  var baseHeight = window.visualViewport.height;
+
+  function onViewportChange() {
+    var vvh = window.visualViewport.height;
+    // Update CSS variable used by sheet max-height
+    document.documentElement.style.setProperty('--vvh', vvh + 'px');
+
+    if (baseHeight - vvh > THRESHOLD) {
+      // Keyboard is open — shift overlay so content is above keyboard
+      document.body.classList.add('kb-open');
+      var offsetY = window.visualViewport.offsetTop;
+      document.querySelectorAll('.overlay.open').forEach(function(el) {
+        el.style.transform = 'translateY(' + offsetY + 'px)';
+        el.style.height = vvh + 'px';
+      });
+    } else {
+      document.body.classList.remove('kb-open');
+      document.querySelectorAll('.overlay').forEach(function(el) {
+        el.style.transform = '';
+        el.style.height = '';
+      });
+    }
+  }
+
+  window.visualViewport.addEventListener('resize', onViewportChange);
+  window.visualViewport.addEventListener('scroll', onViewportChange);
+})();
+</script>
 </body>
 </html>
