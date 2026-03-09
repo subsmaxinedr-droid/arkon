@@ -1,0 +1,148 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.encodeArkContract = encodeArkContract;
+exports.decodeArkContract = decodeArkContract;
+exports.contractFromArkContract = contractFromArkContract;
+exports.contractFromArkContractWithAddress = contractFromArkContractWithAddress;
+exports.isArkContract = isArkContract;
+const base_1 = require("@scure/base");
+const handlers_1 = require("./handlers");
+/**
+ * Prefix for arkcontract strings.
+ */
+const ARKCONTRACT_PREFIX = "arkcontract";
+/**
+ * Encode a contract to the arkcontract string format.
+ *
+ * Format: arkcontract={type}&{key1}={value1}&{key2}={value2}...
+ *
+ * This format is compatible with NArk and allows contracts to be
+ * shared/imported across different Ark implementations.
+ *
+ * @example
+ * ```typescript
+ * const contract: Contract = {
+ *   type: "vhtlc",
+ *   params: { sender: "ab12...", receiver: "cd34...", ... },
+ *   // ...
+ * };
+ *
+ * const encoded = encodeArkContract(contract);
+ * // "arkcontract=vhtlc&sender=ab12...&receiver=cd34...&..."
+ * ```
+ */
+function encodeArkContract(contract) {
+    const params = new URLSearchParams();
+    // Add contract type first
+    params.set(ARKCONTRACT_PREFIX, contract.type);
+    // Add all params
+    for (const [key, value] of Object.entries(contract.params)) {
+        params.set(key, value);
+    }
+    return params.toString();
+}
+/**
+ * Decode an arkcontract string into raw type and data.
+ *
+ * This is a low-level function that parses the URL-encoded format.
+ * For creating typed Contract objects, use `contractFromArkContract`
+ * or `contractFromArkContractWithAddress` instead.
+ *
+ * @param encoded - The arkcontract string
+ * @returns Parsed type and key-value data
+ * @throws If the string is not a valid arkcontract
+ *
+ * @example
+ * ```typescript
+ * const parsed = decodeArkContract("arkcontract=vhtlc&sender=ab12...");
+ * // { type: "vhtlc", data: { sender: "ab12...", ... } }
+ * ```
+ */
+function decodeArkContract(encoded) {
+    const params = new URLSearchParams(encoded);
+    // Extract type from the arkcontract key
+    const type = params.get(ARKCONTRACT_PREFIX);
+    if (!type) {
+        throw new Error(`Invalid arkcontract string: missing '${ARKCONTRACT_PREFIX}' key`);
+    }
+    // Build data object from all other params
+    const data = {};
+    for (const [key, value] of params.entries()) {
+        if (key !== ARKCONTRACT_PREFIX) {
+            data[key] = value;
+        }
+    }
+    return { type, data };
+}
+/**
+ * Create a Contract from an arkcontract string.
+ *
+ * This requires a handler to be registered for the contract type.
+ *
+ * @param encoded - The arkcontract string
+ * @param options - Additional options for the contract
+ * @returns A Contract object
+ * @throws If the string is invalid or no handler exists for the type
+ *
+ * @example
+ * ```typescript
+ * const contract = contractFromArkContract(
+ *   "arkcontract=vhtlc&sender=ab12...",
+ *   {
+ *     label: "Lightning Receive",
+ *   }
+ * );
+ * ```
+ */
+function contractFromArkContract(encoded, options = {}) {
+    const parsed = decodeArkContract(encoded);
+    const handler = handlers_1.contractHandlers.get(parsed.type);
+    if (!handler) {
+        throw new Error(`No handler registered for contract type '${parsed.type}'`);
+    }
+    // Separate params from runtime data
+    // This is type-specific - the handler knows which keys are params
+    // For now, we treat all data as params
+    const params = parsed.data;
+    return {
+        label: options.label,
+        type: parsed.type,
+        params,
+        state: options.state || "active",
+        createdAt: Date.now(),
+        expiresAt: options.expiresAt,
+        metadata: options.metadata,
+    };
+}
+/**
+ * Create a full Contract with derived script and address.
+ *
+ * @param encoded - The arkcontract string
+ * @param serverPubKey - Server public key (for address derivation)
+ * @param addressPrefix - Address prefix (e.g., "tark" for testnet)
+ * @param options - Additional options
+ * @returns A complete Contract object
+ */
+function contractFromArkContractWithAddress(encoded, serverPubKey, addressPrefix, options = {}) {
+    const parsed = decodeArkContract(encoded);
+    const handler = handlers_1.contractHandlers.getOrThrow(parsed.type);
+    const params = parsed.data;
+    const vtxoScript = handler.createScript(params);
+    return {
+        label: options.label,
+        type: parsed.type,
+        params,
+        script: base_1.hex.encode(vtxoScript.pkScript),
+        address: vtxoScript.address(addressPrefix, serverPubKey).encode(),
+        state: options.state || "active",
+        createdAt: Date.now(),
+        expiresAt: options.expiresAt,
+        metadata: options.metadata,
+    };
+}
+/**
+ * Check if a string is an arkcontract.
+ */
+function isArkContract(str) {
+    return str.startsWith(ARKCONTRACT_PREFIX + "=");
+}

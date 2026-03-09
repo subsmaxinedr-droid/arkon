@@ -1,0 +1,15 @@
+import { Transaction } from "@scure/btc-signer/transaction.js";
+import { TxTree } from "./txTree";
+export declare const ErrInvalidSettlementTx: (tx: string) => Error;
+export declare const ErrInvalidSettlementTxOutputs: Error;
+export declare const ErrEmptyTree: Error;
+export declare const ErrNumberOfInputs: Error;
+export declare const ErrWrongSettlementTxid: Error;
+export declare const ErrInvalidAmount: Error;
+export declare const ErrNoLeaves: Error;
+export declare const ErrInvalidTaprootScript: Error;
+export declare const ErrInvalidRoundTxOutputs: Error;
+export declare const ErrWrongCommitmentTxid: Error;
+export declare const ErrMissingCosignersPublicKeys: Error;
+export declare function validateConnectorsTxGraph(settlementTxB64: string, connectorsGraph: TxTree): void;
+export declare function validateVtxoTxGraph(graph: TxTree, roundTransaction: Transaction, sweepTapTreeRoot: Uint8Array): void;

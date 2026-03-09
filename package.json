@@ -1,0 +1,19 @@
+{
+  "name": "arkade-wallet-v45",
+  "version": "45.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@arkade-os/sdk": "0.4.0",
+    "@arkade-os/boltz-swap": "0.3.0"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0",
+    "vite-plugin-singlefile": "^2.0.0"
+  }
+}
