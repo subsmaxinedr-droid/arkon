@@ -148,6 +148,7 @@ a{-webkit-tap-highlight-color:transparent}
   position:fixed;
   top:0;left:0;right:0;bottom:0;
   width:100%;
+  height:100%;height:100dvh;
   display:flex;flex-direction:column;
   max-width:430px;margin:0 auto;
   background:var(--bg);
@@ -313,15 +314,16 @@ a{-webkit-tap-highlight-color:transparent}
 .logo-emoji{font-size:24px;line-height:1}
 .logo-text{font-size:19px;font-weight:900;letter-spacing:.06em;color:var(--t1);font-family:var(--f-logo);-webkit-font-smoothing:auto}
 
-.topbar-r{display:flex;gap:8px}
+.topbar-r{display:flex;gap:8px;align-items:center}
 .ic-btn{
-  width:38px;height:38px;border-radius:50%;
-  background:var(--bg3);border:none;
+  width:38px;height:38px;min-width:38px;min-height:38px;border-radius:50%;
+  background:var(--bg3);border:1.5px solid var(--bdr2);
   display:flex;align-items:center;justify-content:center;
   cursor:pointer;transition:background .15s;color:var(--t2);
+  flex-shrink:0;overflow:hidden;
 }
 .ic-btn:active{background:var(--bg4)}
-.ic-btn svg{width:18px;height:18px}
+.ic-btn svg{width:18px;height:18px;flex-shrink:0}
 
 /* ══════════════════════════════════════════
    SCROLL CONTENT
@@ -337,15 +339,13 @@ a{-webkit-tap-highlight-color:transparent}
 ══════════════════════════════════════════ */
 #bnav{
   flex-shrink:0;
-  height:calc(62px + env(safe-area-inset-bottom,0px));
-  padding:0 6px;
-  padding-bottom:env(safe-area-inset-bottom,0px);
+  padding:6px 6px max(env(safe-area-inset-bottom,8px),8px);
   background:var(--surf);border-top:1px solid var(--bdr);
-  display:flex;align-items:center;
+  display:flex;align-items:stretch;
   z-index:10;
 }
 .ni{
-  flex:1;height:100%;
+  flex:1;height:46px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:3px;cursor:pointer;color:var(--t3);transition:color .15s;position:relative;
 }
@@ -727,11 +727,13 @@ select.finp{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns
   border-radius:28px 28px 0 0;
   border-top:1px solid var(--bdr2);
   animation:su .26s var(--spring);
-  max-height:92vh;overflow-y:auto;
+  max-height:92vh;max-height:92dvh;
   box-shadow:var(--shs);
   display:flex;flex-direction:column;
+  overflow:hidden;
 }
 .sheet::-webkit-scrollbar{display:none}
+.sheet-body{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;flex:1}
 @keyframes su{from{transform:translateY(36px);opacity:.5}to{transform:translateY(0);opacity:1}}
 
 .sheet-handle-row{display:flex;justify-content:center;padding:12px 0 4px}
@@ -970,21 +972,18 @@ select.finp{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns
 
 /* ── Global mobile improvements ── */
 /* All buttons: minimum 44pt touch target per Apple HIG / Google Material */
-.btnp,.btns,.ic-btn,.ni,.ttab{min-height:44px}
+.btnp,.btns,.ni,.ttab{min-height:44px}
+/* ic-btn is explicitly 38x38 circle — do not override with min-height */
+.ic-btn{min-height:38px !important;min-width:38px !important;height:38px !important;width:38px !important}
 /* Smooth momentum scroll on all scroll containers */
 .sheet-body,.page{-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 /* Prevent double-tap zoom on buttons */
 button{touch-action:manipulation}
 /* Input font-size 16px prevents iOS auto-zoom */
 .finp,.addr-input,.s-input{font-size:16px !important}
-/* Sheet safe area handling */
-.sheet{
-  padding-bottom:max(env(safe-area-inset-bottom,0px),16px) !important;
-}
-/* Nav bar safe area */
-#navbar{
-  padding-bottom:max(env(safe-area-inset-bottom,0px),12px);
-  height:calc(64px + max(env(safe-area-inset-bottom,0px),0px));
+/* Sheet safe area handling — padding on body so scrollable area respects home indicator */
+.sheet-body{
+  padding-bottom:max(env(safe-area-inset-bottom,0px),28px) !important;
 }
 /* Keyboard-visible: shrink sheet max-height so content stays accessible */
 body.kb-open .overlay{
@@ -1334,21 +1333,23 @@ body.kb-open .sheet{
         </div>
         <!-- Result: shown after generation -->
         <div id="qr-ln-result" style="display:none">
-          <div class="qr-ring">
-            <div class="qr-ring-inner">
-              <div id="qr-ln-canvas"></div>
+          <div style="background:var(--bg3);border:1px solid var(--bdr2);border-radius:var(--r-md);padding:16px;margin-bottom:14px">
+            <div class="qr-ring" style="margin-bottom:10px">
+              <div class="qr-ring-inner">
+                <div id="qr-ln-canvas"></div>
+              </div>
             </div>
-          </div>
-          <!-- Amount subtext -->
-          <div style="text-align:center;margin-bottom:4px">
-            <span style="font-size:18px;font-weight:800;color:var(--t1)" id="qr-ln-amt-display">—</span>
-            <span style="font-size:12px;color:var(--t3);margin-left:4px">SATS</span>
-          </div>
-          <div style="font-size:11px;color:var(--t3);text-align:center;margin-bottom:12px" id="qr-ln-fiat-display"></div>
-          <div id="qr-ln-status" style="font-size:12px;color:var(--t3);text-align:center;margin-bottom:10px">Invoice ready — auto-claims into your Ark wallet after payment.</div>
-          <div class="addr-blk" style="margin-bottom:10px">
-            <div class="addr-lbl">Lightning Invoice</div>
-            <div class="addr-val" id="qr-ln-invoice" style="word-break:break-all;font-size:11px"></div>
+            <!-- Amount subtext -->
+            <div style="text-align:center;margin-bottom:4px">
+              <span style="font-size:18px;font-weight:800;color:var(--t1)" id="qr-ln-amt-display">—</span>
+              <span style="font-size:12px;color:var(--t3);margin-left:4px">SATS</span>
+            </div>
+            <div style="font-size:11px;color:var(--t3);text-align:center;margin-bottom:10px" id="qr-ln-fiat-display"></div>
+            <div id="qr-ln-status" style="font-size:12px;color:var(--t3);text-align:center;margin-bottom:10px">Invoice ready — auto-claims into your Ark wallet after payment.</div>
+            <div class="addr-row" style="margin-bottom:0">
+              <span class="addr-txt" id="qr-ln-invoice" style="word-break:break-all;font-size:11px"></span>
+              <div class="cpb" onclick="cpQrLnInvoice()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></div>
+            </div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
             <button class="btnp" onclick="cpQrLnInvoice()">Copy</button>
