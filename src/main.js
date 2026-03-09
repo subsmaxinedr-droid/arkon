@@ -1263,8 +1263,8 @@ window.openBackupSheet = window._openBackupSheet = async function() {
     </div>
 
     <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Your private key (hex)</div>
-    <div id="privkey-masked" style="background:var(--bg3);border:1.5px solid var(--bdr);border-radius:12px;padding:14px;font-size:20px;color:var(--t3);font-family:monospace;word-break:break-all;margin-bottom:10px;text-align:center;letter-spacing:.1em">••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••</div>
-    <div id="privkey-revealed" style="display:none;background:var(--bg3);border:1.5px solid var(--bdr);border-radius:12px;padding:14px;font-size:12px;color:var(--t1);font-family:monospace;word-break:break-all;margin-bottom:10px;user-select:all;line-height:1.7"></div>
+    <div id="privkey-masked" style="background:var(--bg3);border:1.5px solid var(--bdr);border-radius:12px;padding:14px;font-size:14px;color:var(--t3);font-family:monospace;word-break:break-all;overflow-wrap:break-word;overflow:hidden;max-width:100%;margin-bottom:10px;text-align:center;letter-spacing:.05em">••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••</div>
+    <div id="privkey-revealed" style="display:none;background:var(--bg3);border:1.5px solid var(--bdr);border-radius:12px;padding:14px;font-size:12px;color:var(--t1);font-family:monospace;word-break:break-all;overflow-wrap:break-word;overflow:hidden;max-width:100%;margin-bottom:10px;user-select:all;line-height:1.7"></div>
     <div style="display:flex;gap:8px;margin-bottom:20px">
       <button id="btn-reveal-key" class="btnp" style="flex:1;height:42px;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--surf);color:var(--acc2);border:1.5px solid var(--acc)" onclick="window._revealPrivKey()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>

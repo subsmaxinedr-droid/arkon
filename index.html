@@ -145,8 +145,9 @@ svg{display:block;flex-shrink:0}
 a{-webkit-tap-highlight-color:transparent}
 
 #app{
-  position:relative;width:100%;height:100%;
-  min-height:100vh;min-height:100dvh;
+  position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  width:100%;
   display:flex;flex-direction:column;
   max-width:430px;margin:0 auto;
   background:var(--bg);
@@ -306,6 +307,7 @@ a{-webkit-tap-highlight-color:transparent}
   padding:env(safe-area-inset-top,0px) 20px 0;
   display:flex;align-items:center;justify-content:space-between;
   background:var(--bg);
+  z-index:10;
 }
 .logo-row{display:flex;align-items:center;gap:8px}
 .logo-emoji{font-size:24px;line-height:1}
@@ -340,6 +342,7 @@ a{-webkit-tap-highlight-color:transparent}
   padding-bottom:env(safe-area-inset-bottom,0px);
   background:var(--surf);border-top:1px solid var(--bdr);
   display:flex;align-items:center;
+  z-index:10;
 }
 .ni{
   flex:1;height:100%;
@@ -1481,39 +1484,42 @@ button{touch-action:manipulation}
           <div class="sr-text"><div class="sr-nm">About</div><div class="sr-sb">ARKADE V1 Mainnet · arkade.computer</div></div>
           <span class="sr-ch">›</span>
         </div>
-        <!-- General -->
-        <div class="sr" style="cursor:default;flex-direction:column;align-items:stretch;gap:10px">
+        <!-- Personalize Your Wallet -->
+        <div class="sr" style="cursor:pointer;flex-direction:column;align-items:stretch;gap:0" onclick="togglePersonalizePanel()">
           <div style="display:flex;align-items:center;gap:12px">
             <div class="sr-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>
-            <div class="sr-text"><div class="sr-nm">General</div><div class="sr-sb">Appearance & currency</div></div>
+            <div class="sr-text"><div class="sr-nm">Personalize Your Wallet</div><div class="sr-sb">Appearance &amp; display options</div></div>
+            <svg id="personalize-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;color:var(--t3);transition:transform .2s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
           </div>
-          <!-- Dark mode row -->
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 0 2px 46px">
-            <span style="font-size:13px;color:var(--t2)">Dark Mode</span>
-            <div class="tog on" id="dm-tog" onclick="toggleDark()"></div>
-          </div>
-          <!-- Balance display mode row — comes first, drives currency options -->
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 0 8px 46px;gap:12px">
-            <span style="font-size:13px;color:var(--t2);flex-shrink:0">Home Balance</span>
-            <div class="bdm-row" style="flex:1;max-width:180px">
-              <button class="bdm-opt" id="bdm-fiat" onclick="setBalDisplay('fiat')">Fiat</button>
-              <button class="bdm-opt active" id="bdm-both" onclick="setBalDisplay('both')">Both</button>
-              <button class="bdm-opt" id="bdm-sats" onclick="setBalDisplay('sats')">Sats</button>
+          <div id="personalize-panel" style="display:none;padding-top:12px">
+            <!-- Dark mode row -->
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 0 2px 46px">
+              <span style="font-size:13px;color:var(--t2)">Dark Mode</span>
+              <div class="tog on" id="dm-tog" onclick="event.stopPropagation();toggleDark()"></div>
             </div>
-          </div>
-          <!-- Currency row — hidden when Sats mode active -->
-          <div id="cur-row" style="display:flex;align-items:center;justify-content:space-between;padding:2px 0 6px 46px">
-            <span style="font-size:13px;color:var(--t2)">Currency</span>
-            <select class="cur-setting-sel" id="cur-settings-sel" onchange="setCurSettings(this)">
-              <option value="USD">USD</option>
-              <option value="EUR">EUR</option>
-              <option value="CHF">CHF</option>
-            </select>
-          </div>
-          <!-- Sats locked row — shown only when Sats mode active -->
-          <div id="sats-locked-row" style="display:none;align-items:center;justify-content:space-between;padding:2px 0 6px 46px">
-            <span style="font-size:13px;color:var(--t2)">Currency</span>
-            <span style="font-size:13px;font-weight:700;color:var(--acc2);background:var(--accs);padding:5px 12px;border-radius:var(--r-pill)">SATS</span>
+            <!-- Balance display mode row -->
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0 8px 46px;gap:12px">
+              <span style="font-size:13px;color:var(--t2);flex-shrink:0">Home Balance</span>
+              <div class="bdm-row" style="flex:1;max-width:180px">
+                <button class="bdm-opt" id="bdm-fiat" onclick="event.stopPropagation();setBalDisplay('fiat')">Fiat</button>
+                <button class="bdm-opt active" id="bdm-both" onclick="event.stopPropagation();setBalDisplay('both')">Both</button>
+                <button class="bdm-opt" id="bdm-sats" onclick="event.stopPropagation();setBalDisplay('sats')">Sats</button>
+              </div>
+            </div>
+            <!-- Currency row — hidden when Sats mode active -->
+            <div id="cur-row" style="display:flex;align-items:center;justify-content:space-between;padding:2px 0 6px 46px">
+              <span style="font-size:13px;color:var(--t2)">Currency</span>
+              <select class="cur-setting-sel" id="cur-settings-sel" onclick="event.stopPropagation()" onchange="setCurSettings(this)">
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="CHF">CHF</option>
+              </select>
+            </div>
+            <!-- Sats locked row — shown only when Sats mode active -->
+            <div id="sats-locked-row" style="display:none;align-items:center;justify-content:space-between;padding:2px 0 6px 46px">
+              <span style="font-size:13px;color:var(--t2)">Currency</span>
+              <span style="font-size:13px;font-weight:700;color:var(--acc2);background:var(--accs);padding:5px 12px;border-radius:var(--r-pill)">SATS</span>
+            </div>
           </div>
         </div>
 
@@ -4552,6 +4558,15 @@ try {
 
 function saveNotifPrefs() {
   try { localStorage.setItem('notif_prefs', JSON.stringify(_notifPrefs)); } catch(e) {}
+}
+
+function togglePersonalizePanel() {
+  const panel = document.getElementById('personalize-panel');
+  const chevron = document.getElementById('personalize-chevron');
+  if (!panel) return;
+  const open = panel.style.display !== 'none';
+  panel.style.display = open ? 'none' : 'block';
+  if (chevron) chevron.style.transform = open ? '' : 'rotate(180deg)';
 }
 
 function toggleNotifPanel() {
