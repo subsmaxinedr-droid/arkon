@@ -7,7 +7,7 @@
  * The encrypted private key is stored in localStorage. Reading localStorage alone
  * no longer reveals the private key — both stores are required.
  */
-import { SingleKey, Wallet, ServiceWorkerWallet, Ramps, waitForIncomingFunds, VtxoManager } from '@arkade-os/sdk'
+import { SingleKey, Wallet, Ramps, waitForIncomingFunds, VtxoManager } from '@arkade-os/sdk'
 import { ArkadeSwaps, BoltzSwapProvider, decodeInvoice } from '@arkade-os/boltz-swap'
 import { IndexedDBStorageAdapter } from '@arkade-os/sdk/adapters/indexedDB'
 
@@ -194,12 +194,18 @@ async function disposeSwaps() {
 
 async function migrateV1Key(storage) {
   const OLD_KEY = 'arkade_wallet_privkey_mainnet_v1'
-  const rawHex  = await storage.getItem(OLD_KEY)
+  // v1 key was stored unencrypted in localStorage — check both IDB and localStorage
+  let rawHex = await storage.getItem(OLD_KEY)
+  if (!rawHex && typeof localStorage !== 'undefined') {
+    rawHex = localStorage.getItem(OLD_KEY)
+  }
   if (!rawHex || !/^[0-9a-fA-F]{64}$/.test(rawHex.trim())) return null
   console.log('[ArkON] Migrating v1 key to encrypted v2 storage…')
   const encrypted = await encryptPrivKey(rawHex.trim())
   await storage.setItem(STORAGE_KEY, encrypted)
+  // Remove from wherever it was found
   await storage.removeItem(OLD_KEY)
+  if (typeof localStorage !== 'undefined') localStorage.removeItem(OLD_KEY)
   console.log('[ArkON] Migration complete — v1 key removed')
   return rawHex.trim()
 }
@@ -209,17 +215,21 @@ async function migrateV1Key(storage) {
 export async function init() {
   if (_wallet) return _wallet
 
-  _storage = new IndexedDBStorageAdapter('arkade_wallet', 1)
+  _storage = new IndexedDBStorageAdapter('arkade_wallet')
 
   // ── Migrate encrypted key from localStorage to IndexedDB (one-time) ────────
   const idbStored = await _storage.getItem(STORAGE_KEY)
   if (!idbStored) {
-    const lsValue = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null
-    if (lsValue) {
-      console.log('[ArkON] Migrating encrypted key from localStorage → IndexedDB…')
-      await _storage.setItem(STORAGE_KEY, lsValue)
-      localStorage.removeItem(STORAGE_KEY)
-      console.log('[ArkON] Migration complete')
+    try {
+      const lsValue = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null
+      if (lsValue) {
+        console.log('[ArkON] Migrating encrypted key from localStorage → IndexedDB…')
+        await _storage.setItem(STORAGE_KEY, lsValue)
+        localStorage.removeItem(STORAGE_KEY)
+        console.log('[ArkON] Migration complete')
+      }
+    } catch (e) {
+      console.warn('[ArkON] localStorage migration failed, continuing:', e)
     }
   }
 
@@ -263,11 +273,9 @@ export async function init() {
 
   const identity = SingleKey.fromHex(privateKeyHex)
 
-  _wallet = await ServiceWorkerWallet.setup({
-    serviceWorkerPath: '/service-worker.js',
+  _wallet = await Wallet.create({
     identity,
     arkServerUrl: ARK_SERVER,
-    storage: _storage,
   })
 
   _manager = new VtxoManager(_wallet, { enabled: true, thresholdPercentage: 10 })
@@ -278,13 +286,13 @@ export async function init() {
 
 
 export async function hasPasswordEnabled() {
-  if (!_storage) _storage = new IndexedDBStorageAdapter('arkade_wallet', 1)
+  if (!_storage) _storage = new IndexedDBStorageAdapter('arkade_wallet')
   const raw = await _storage.getItem(STORAGE_KEY)
   return isPasswordEnvelope(raw)
 }
 
 export async function unlockWithPassword(password) {
-  if (!_storage) _storage = new IndexedDBStorageAdapter('arkade_wallet', 1)
+  if (!_storage) _storage = new IndexedDBStorageAdapter('arkade_wallet')
   const raw = await _storage.getItem(STORAGE_KEY)
   if (!isPasswordEnvelope(raw)) return true
   const privKeyHex = await decryptPrivKeyWithPassword(raw, password)
@@ -302,7 +310,7 @@ export function lockWallet() {
 }
 
 export async function enablePassword(password) {
-  if (!_storage) _storage = new IndexedDBStorageAdapter('arkade_wallet', 1)
+  if (!_storage) _storage = new IndexedDBStorageAdapter('arkade_wallet')
   const privKeyHex = await getPrivKey()
   if (!privKeyHex) throw new Error('No wallet key found')
   const encrypted = await encryptPrivKeyWithPassword(privKeyHex, password)
@@ -316,7 +324,7 @@ export async function enablePassword(password) {
 }
 
 export async function disablePassword() {
-  if (!_storage) _storage = new IndexedDBStorageAdapter('arkade_wallet', 1)
+  if (!_storage) _storage = new IndexedDBStorageAdapter('arkade_wallet')
   const privKeyHex = await getPrivKey()
   if (!privKeyHex) throw new Error('No wallet key found')
   const encrypted = await encryptPrivKey(privKeyHex)
@@ -519,7 +527,7 @@ export async function restoreFromEncryptedBackup(payload, password) {
 // getPrivKey — returns the decrypted hex key for backup display
 export async function getPrivKey() {
   if (_sessionPrivKeyHex) return _sessionPrivKeyHex
-  if (!_storage) _storage = new IndexedDBStorageAdapter('arkade_wallet', 1)
+  if (!_storage) _storage = new IndexedDBStorageAdapter('arkade_wallet')
   const encrypted = await _storage.getItem(STORAGE_KEY)
   if (!encrypted) {
     const old = await _storage.getItem('arkade_wallet_privkey_mainnet_v1')
@@ -551,7 +559,7 @@ export async function listenForIncoming(cb) {
 }
 
 export async function resetWallet() {
-  if (!_storage) _storage = new IndexedDBStorageAdapter('arkade_wallet', 1)
+  if (!_storage) _storage = new IndexedDBStorageAdapter('arkade_wallet')
   await _storage.removeItem(STORAGE_KEY)
   await _storage.removeItem('arkade_wallet_privkey_mainnet_v1')
   // Clear the IDB encryption key too (full reset)
@@ -575,7 +583,7 @@ export async function resetWallet() {
 export async function restoreFromPrivKey(privKeyHex) {
   const hex = (privKeyHex || '').trim()
   if (hex.length !== 64 || !/^[0-9a-fA-F]+$/.test(hex)) return false
-  if (!_storage) _storage = new IndexedDBStorageAdapter('arkade_wallet', 1)
+  if (!_storage) _storage = new IndexedDBStorageAdapter('arkade_wallet')
   const encrypted = await encryptPrivKey(hex)
   await _storage.setItem(STORAGE_KEY, encrypted)
   disposeSwaps().catch(() => {})
