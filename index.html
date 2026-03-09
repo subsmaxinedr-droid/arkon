@@ -1467,7 +1467,7 @@ button{touch-action:manipulation}
     <!-- Profile -->
     <div class="prof-tile" onclick="openRenameWallet()">
       <div class="prof-av"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></div>
-      <div style="flex:1;min-width:0"><div class="prof-nm" id="wallet-name-display">My Wallet</div><div class="prof-addr">ark1q···0wlh · Ark</div></div>
+      <div style="flex:1;min-width:0"><div class="prof-nm" id="wallet-name-display">My Wallet</div><div class="prof-addr" id="wallet-addr-display">Connecting…</div></div>
       <div class="prof-edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:13px;height:13px"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
     </div>
 
@@ -2075,7 +2075,7 @@ button{touch-action:manipulation}
             <input id="password-input-2" type="password" placeholder="Confirm password" style="width:100%;height:46px;border-radius:12px;border:1px solid var(--bdr);background:var(--bg3);color:var(--t1);padding:0 14px;outline:none">
           </div>
         </div>
-        <div style="font-size:11px;color:var(--t3);line-height:1.5;margin-top:10px">Use at least 4 characters. The wallet will ask for this password only when opening the app.</div>
+        <div style="font-size:11px;color:var(--t3);line-height:1.5;margin-top:10px">Use at least 8 characters. The wallet will ask for this password only when opening the app.</div>
       </div>
 
       <div style="display:grid;gap:10px">
@@ -2963,6 +2963,15 @@ window._setLiveAddresses = function(arkAddr, boardingAddr) {
     const el = document.getElementById(id);
     if (el) el.textContent = arkAddr;
   });
+
+  // Update settings profile address display with truncated address
+  const profAddr = document.getElementById('wallet-addr-display');
+  if (profAddr && arkAddr) {
+    const truncated = arkAddr.length > 16
+      ? arkAddr.slice(0, 8) + '···' + arkAddr.slice(-4) + ' · Ark'
+      : arkAddr + ' · Ark';
+    profAddr.textContent = truncated;
+  }
 
   // Regenerate QR codes with live address
   const qrMain = document.getElementById('qr-main-canvas');
@@ -4153,9 +4162,20 @@ function saveWalletName() {
   const val = document.getElementById('wallet-name-input').value.trim();
   if (!val) { showToast('Enter a name'); return; }
   document.getElementById('wallet-name-display').textContent = val;
+  try { localStorage.setItem('arkade_wallet_name', val); } catch {}
   closeSheet('rename');
   showToast('Wallet renamed');
 }
+
+(function loadSavedWalletName() {
+  try {
+    const saved = localStorage.getItem('arkade_wallet_name');
+    if (saved) {
+      const el = document.getElementById('wallet-name-display');
+      if (el) el.textContent = saved;
+    }
+  } catch {}
+})();
 
 /* ═══════════════════════════════════════════
    CHART ENGINE — dynamic canvas with drag/hover tooltip
