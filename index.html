@@ -329,8 +329,8 @@ a{-webkit-tap-highlight-color:transparent}
 #content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
 #content::-webkit-scrollbar{display:none}
 .page{display:none}
-.page.active{display:block;animation:pi .2s ease}
-@keyframes pi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.page.active{display:block;animation:pi .28s var(--ease)}
+@keyframes pi{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 
 /* ══════════════════════════════════════════
    BOTTOM NAV
@@ -547,13 +547,14 @@ select.finp{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns
 /* ══════════════════════════════════════════
    QR PAGE
 ══════════════════════════════════════════ */
-#page-qr{padding:0 20px 32px}
+#page-qr{padding:0 20px 12px}
+#page-qr .pg-head{padding:14px 0 12px}
 .pg-head{padding:22px 0 20px}
 .pg-title{font-size:22px;font-weight:800;letter-spacing:-.02em;color:var(--t1)}
 .pg-sub{font-size:12px;color:var(--t3);margin-top:2px}
 
 .tab-toggle{
-  display:flex;background:var(--bg3);border-radius:var(--r-pill);padding:4px;margin-bottom:26px;
+  display:flex;background:var(--bg3);border-radius:var(--r-pill);padding:4px;margin-bottom:14px;
 }
 .ttab{
   flex:1;padding:10px;border-radius:var(--r-pill);text-align:center;
@@ -562,7 +563,7 @@ select.finp{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns
 .ttab.active{background:var(--surf);color:var(--t1);box-shadow:0 2px 8px rgba(0,0,0,.2)}
 
 .qr-ring{
-  display:flex;align-items:center;justify-content:center;margin-bottom:22px;
+  display:flex;align-items:center;justify-content:center;margin-bottom:10px;
 }
 .qr-ring-inner{
   width:236px;height:236px;border-radius:28px;
@@ -589,11 +590,11 @@ select.finp{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns
 .sc-hint svg{width:32px;height:32px;color:var(--t3);margin:0 auto 8px}
 .sc-hint p{font-size:11px;color:var(--t3);font-weight:500;line-height:1.5}
 
-.qr-type-row{display:flex;gap:6px;margin-bottom:18px}
+.qr-type-row{display:flex;gap:6px;margin-bottom:10px}
 .qtt{flex:1;padding:8px 4px;text-align:center;border-radius:var(--r-md);border:1.5px solid var(--bdr);font-size:11px;font-weight:700;color:var(--t2);cursor:pointer;transition:all .15s}
 .qtt.active{border-color:var(--acc);background:var(--accs);color:var(--acc2)}
 
-.addr-blk{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r-md);padding:13px 15px;margin-bottom:14px}
+.addr-blk{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r-md);padding:10px 15px;margin-bottom:10px}
 .addr-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:5px}
 .addr-val{font-size:12px;color:var(--t2);word-break:break-all;line-height:1.6;font-weight:500}
 
@@ -1269,7 +1270,7 @@ button{touch-action:manipulation}
 
 <!-- ██████████████ QR PAGE ██████████████ -->
 <div class="page" id="page-qr">
-  <div style="padding:0 20px 32px">
+  <div>
     <div class="pg-head"><div class="pg-title">QR Code</div><div class="pg-sub">Scan or share your address</div></div>
 
     <div class="tab-toggle">
@@ -1485,42 +1486,10 @@ button{touch-action:manipulation}
           <span class="sr-ch">›</span>
         </div>
         <!-- Personalize Your Wallet -->
-        <div class="sr" style="cursor:pointer;flex-direction:column;align-items:stretch;gap:0" onclick="togglePersonalizePanel()">
-          <div style="display:flex;align-items:center;gap:12px">
-            <div class="sr-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>
-            <div class="sr-text"><div class="sr-nm">Personalize Your Wallet</div><div class="sr-sb">Appearance &amp; display options</div></div>
-            <svg id="personalize-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;color:var(--t3);transition:transform .2s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
-          <div id="personalize-panel" style="display:none;padding-top:12px">
-            <!-- Dark mode row -->
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:2px 0 2px 46px">
-              <span style="font-size:13px;color:var(--t2)">Dark Mode</span>
-              <div class="tog on" id="dm-tog" onclick="event.stopPropagation();toggleDark()"></div>
-            </div>
-            <!-- Balance display mode row -->
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0 8px 46px;gap:12px">
-              <span style="font-size:13px;color:var(--t2);flex-shrink:0">Home Balance</span>
-              <div class="bdm-row" style="flex:1;max-width:180px">
-                <button class="bdm-opt" id="bdm-fiat" onclick="event.stopPropagation();setBalDisplay('fiat')">Fiat</button>
-                <button class="bdm-opt active" id="bdm-both" onclick="event.stopPropagation();setBalDisplay('both')">Both</button>
-                <button class="bdm-opt" id="bdm-sats" onclick="event.stopPropagation();setBalDisplay('sats')">Sats</button>
-              </div>
-            </div>
-            <!-- Currency row — hidden when Sats mode active -->
-            <div id="cur-row" style="display:flex;align-items:center;justify-content:space-between;padding:2px 0 6px 46px">
-              <span style="font-size:13px;color:var(--t2)">Currency</span>
-              <select class="cur-setting-sel" id="cur-settings-sel" onclick="event.stopPropagation()" onchange="setCurSettings(this)">
-                <option value="USD">USD</option>
-                <option value="EUR">EUR</option>
-                <option value="CHF">CHF</option>
-              </select>
-            </div>
-            <!-- Sats locked row — shown only when Sats mode active -->
-            <div id="sats-locked-row" style="display:none;align-items:center;justify-content:space-between;padding:2px 0 6px 46px">
-              <span style="font-size:13px;color:var(--t2)">Currency</span>
-              <span style="font-size:13px;font-weight:700;color:var(--acc2);background:var(--accs);padding:5px 12px;border-radius:var(--r-pill)">SATS</span>
-            </div>
-          </div>
+        <div class="sr" onclick="openSheet('personalize')">
+          <div class="sr-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>
+          <div class="sr-text"><div class="sr-nm">Personalize Your Wallet</div><div class="sr-sb">Appearance &amp; display options</div></div>
+          <span class="sr-ch">›</span>
         </div>
 
         <!-- Notes -->
@@ -1530,44 +1499,10 @@ button{touch-action:manipulation}
           <span class="sr-ch">›</span>
         </div>
         <!-- Notifications -->
-        <div class="sr" style="cursor:pointer;flex-direction:column;align-items:stretch;gap:0" onclick="toggleNotifPanel()">
-          <div style="display:flex;align-items:center;gap:12px">
-            <div class="sr-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div>
-            <div class="sr-text"><div class="sr-nm">Notifications</div><div class="sr-sb" id="notif-status-text">Tap to manage</div></div>
-            <svg id="notif-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;color:var(--t3);transition:transform .2s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
-          <div id="notif-panel" style="display:none;padding-top:12px;padding-left:0">
-            <div class="notif-settings-panel">
-              <div class="notif-row">
-                <div class="notif-row-info">
-                  <div class="notif-row-nm">Payment Received</div>
-                  <div class="notif-row-sb">Alert when bitcoin arrives in your wallet</div>
-                </div>
-                <div class="tog on" id="notif-tog-received" onclick="event.stopPropagation();toggleNotifPref('received',this)"></div>
-              </div>
-              <div class="notif-row">
-                <div class="notif-row-info">
-                  <div class="notif-row-nm">Payment Sent</div>
-                  <div class="notif-row-sb">Confirm when your payment is broadcast</div>
-                </div>
-                <div class="tog on" id="notif-tog-sent" onclick="event.stopPropagation();toggleNotifPref('sent',this)"></div>
-              </div>
-              <div class="notif-row">
-                <div class="notif-row-info">
-                  <div class="notif-row-nm">Failed Transactions</div>
-                  <div class="notif-row-sb">Alert if a payment or send fails</div>
-                </div>
-                <div class="tog on" id="notif-tog-failed" onclick="event.stopPropagation();toggleNotifPref('failed',this)"></div>
-              </div>
-              <div class="notif-row">
-                <div class="notif-row-info">
-                  <div class="notif-row-nm">Price Alerts</div>
-                  <div class="notif-row-sb">Notify on significant BTC price moves</div>
-                </div>
-                <div class="tog" id="notif-tog-price" onclick="event.stopPropagation();toggleNotifPref('price',this)"></div>
-              </div>
-            </div>
-          </div>
+        <div class="sr" onclick="openNotifSheet()">
+          <div class="sr-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div>
+          <div class="sr-text"><div class="sr-nm">Notifications</div><div class="sr-sb" id="notif-status-text">Tap to manage</div></div>
+          <span class="sr-ch">›</span>
         </div>
         <!-- Support -->
         <div class="sr" onclick="openApp('support')">
@@ -1839,6 +1774,102 @@ button{touch-action:manipulation}
         </div>
       </div>
       <div style="text-align:center;font-size:11px;color:var(--t3);padding-bottom:8px">Built on the Ark Protocol · Bitcoin Mainnet</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PERSONALIZE SHEET
+═══════════════════════════════════════════ -->
+<div class="overlay" id="sheet-personalize">
+  <div class="sheet">
+    <div class="sheet-handle-row"><div class="sheet-handle"></div></div>
+    <div class="sheet-head">
+      <span class="sheet-title">Personalize Your Wallet</span>
+      <button class="sheet-close" onclick="closeSheet('personalize')">✕</button>
+    </div>
+    <div class="sheet-body">
+      <div class="slist">
+        <!-- Dark mode row -->
+        <div class="sr" style="cursor:default">
+          <div class="sr-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg></div>
+          <div class="sr-text"><div class="sr-nm">Dark Mode</div></div>
+          <div class="tog on" id="dm-tog" onclick="toggleDark()"></div>
+        </div>
+        <!-- Balance display mode row -->
+        <div class="sr" style="cursor:default;flex-direction:column;align-items:stretch;gap:10px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="sr-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+            <div class="sr-text"><div class="sr-nm">Home Balance</div><div class="sr-sb">Choose what to show on the home screen</div></div>
+          </div>
+          <div class="bdm-row" style="margin-left:46px">
+            <button class="bdm-opt" id="bdm-fiat" onclick="setBalDisplay('fiat')">Fiat</button>
+            <button class="bdm-opt active" id="bdm-both" onclick="setBalDisplay('both')">Both</button>
+            <button class="bdm-opt" id="bdm-sats" onclick="setBalDisplay('sats')">Sats</button>
+          </div>
+        </div>
+        <!-- Currency row — hidden when Sats mode active -->
+        <div id="cur-row" class="sr" style="cursor:default">
+          <div class="sr-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></div>
+          <div class="sr-text"><div class="sr-nm">Currency</div></div>
+          <select class="cur-setting-sel" id="cur-settings-sel" onchange="setCurSettings(this)">
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="CHF">CHF</option>
+          </select>
+        </div>
+        <!-- Sats locked row — shown only when Sats mode active -->
+        <div id="sats-locked-row" class="sr" style="display:none;cursor:default">
+          <div class="sr-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></div>
+          <div class="sr-text"><div class="sr-nm">Currency</div></div>
+          <span style="font-size:13px;font-weight:700;color:var(--acc2);background:var(--accs);padding:5px 12px;border-radius:var(--r-pill)">SATS</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     NOTIFICATIONS SHEET
+═══════════════════════════════════════════ -->
+<div class="overlay" id="sheet-notifications">
+  <div class="sheet">
+    <div class="sheet-handle-row"><div class="sheet-handle"></div></div>
+    <div class="sheet-head">
+      <span class="sheet-title">Notifications</span>
+      <button class="sheet-close" onclick="closeSheet('notifications')">✕</button>
+    </div>
+    <div class="sheet-body">
+      <div class="notif-settings-panel">
+        <div class="notif-row">
+          <div class="notif-row-info">
+            <div class="notif-row-nm">Payment Received</div>
+            <div class="notif-row-sb">Alert when bitcoin arrives in your wallet</div>
+          </div>
+          <div class="tog on" id="notif-tog-received" onclick="toggleNotifPref('received',this)"></div>
+        </div>
+        <div class="notif-row">
+          <div class="notif-row-info">
+            <div class="notif-row-nm">Payment Sent</div>
+            <div class="notif-row-sb">Confirm when your payment is broadcast</div>
+          </div>
+          <div class="tog on" id="notif-tog-sent" onclick="toggleNotifPref('sent',this)"></div>
+        </div>
+        <div class="notif-row">
+          <div class="notif-row-info">
+            <div class="notif-row-nm">Failed Transactions</div>
+            <div class="notif-row-sb">Alert if a payment or send fails</div>
+          </div>
+          <div class="tog on" id="notif-tog-failed" onclick="toggleNotifPref('failed',this)"></div>
+        </div>
+        <div class="notif-row">
+          <div class="notif-row-info">
+            <div class="notif-row-nm">Price Alerts</div>
+            <div class="notif-row-sb">Notify on significant BTC price moves</div>
+          </div>
+          <div class="tog" id="notif-tog-price" onclick="toggleNotifPref('price',this)"></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -4560,28 +4591,14 @@ function saveNotifPrefs() {
   try { localStorage.setItem('notif_prefs', JSON.stringify(_notifPrefs)); } catch(e) {}
 }
 
-function togglePersonalizePanel() {
-  const panel = document.getElementById('personalize-panel');
-  const chevron = document.getElementById('personalize-chevron');
-  if (!panel) return;
-  const open = panel.style.display !== 'none';
-  panel.style.display = open ? 'none' : 'block';
-  if (chevron) chevron.style.transform = open ? '' : 'rotate(180deg)';
-}
-
-function toggleNotifPanel() {
-  const panel = document.getElementById('notif-panel');
-  const chevron = document.getElementById('notif-chevron');
-  if (!panel) return;
-  const open = panel.style.display !== 'none';
-  panel.style.display = open ? 'none' : 'block';
-  if (chevron) chevron.style.transform = open ? '' : 'rotate(180deg)';
-  // Sync toggle states
+function openNotifSheet() {
+  // Sync toggle states before opening
   ['received','sent','failed','price'].forEach(k => {
     const tog = document.getElementById('notif-tog-' + k);
     if (tog) tog.classList.toggle('on', !!_notifPrefs[k]);
   });
   updateNotifStatusText();
+  openSheet('notifications');
 }
 
 function toggleNotifPref(key, el) {
