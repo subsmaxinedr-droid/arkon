@@ -2231,10 +2231,10 @@ async function splashFinishCreate() {
   if (btn) { btn.disabled = true; btn.textContent = 'Creating wallet…'; }
 
   try {
-    // Use the SDK adapter (which is a plain localStorage wrapper — verified in source)
-    // This ensures 100% consistency with how wallet.js reads the key on boot.
-    const { restoreFromPrivKey } = await import('./src/wallet.js');
-    const ok = await restoreFromPrivKey(_newPrivKey);
+    // Use the function exposed by main.js on window — avoids a dynamic import that
+    // breaks in the production single-file build where /src/wallet.js no longer exists.
+    if (typeof window._restoreFromPrivKey !== 'function') throw new Error('Wallet not ready');
+    const ok = await window._restoreFromPrivKey(_newPrivKey);
     if (!ok) throw new Error('Key storage failed');
   } catch (e) {
     console.error('[ArkON] Failed to save key securely:', e);
@@ -2265,8 +2265,8 @@ async function splashRestore() {
   errEl.textContent = '';
 
   try {
-    const { restoreFromPrivKey } = await import('./src/wallet.js');
-    const ok = await restoreFromPrivKey(hex);
+    if (typeof window._restoreFromPrivKey !== 'function') throw new Error('Wallet not ready');
+    const ok = await window._restoreFromPrivKey(hex);
     if (!ok) {
       errEl.textContent = 'Invalid private key — check the value and try again.';
       if (btn) { btn.disabled = false; btn.textContent = 'Restore Wallet'; }

@@ -90,6 +90,11 @@ window._setSendInProgress = (val) => {
 window._openBackupSheet = null  // filled in below after definition
 window._doRestoreWallet  = null  // filled in below after definition
 
+// Expose restoreFromPrivKey for the onboarding inline script (splashFinishCreate / splashRestore).
+// Dynamic import('./src/wallet.js') breaks in the production single-file build because the file
+// no longer exists as a separate URL after vite-plugin-singlefile inlines everything.
+window._restoreFromPrivKey = restoreFromPrivKey
+
 window._generateLightningInvoice = async ({ amount, description }) => {
   const result = await createLightningInvoice({ amount, description })
   return result
